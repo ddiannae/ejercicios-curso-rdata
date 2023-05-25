@@ -1,0 +1,100 @@
+---
+title: "Reporte"
+author: "Diana García"
+date: "2023-03-05"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Tidyverse para análisis de datos 
+
+La suite de tidyverse contiene muchos paquetes para manejo de datos. 
+
+```{r results='hide',message=FALSE}
+library(readr)
+library(dplyr)
+```
+
+Con la función `read_tsv()` podemos importar un archivo de datos separado por tabs. 
+
+```{r message=FALSE}
+poblacion <- read_tsv("data/poblacion.tsv")
+```
+
+El dataset de población contiene datos del INEGI del censo de población 2020. 
+
+```{r}
+glimpse(poblacion)
+```
+
+El verbo `filter()` de dplyr nos permite seleccionar un subconjunto de las filas de acuerdo a alguna condición.
+
+```{r}
+bajio <- c("Aguascalientes", "Guanajuato", "Querétaro", "San Luis Potosí", "Zacatecas")
+poblacion <- poblacion %>% 
+  filter(nom_ent %in% bajio)
+```
+
+El verbo `select()` nos permite seleccionar y renombrar un subconjunto de las columnas 
+
+```{r}
+poblacion <- poblacion %>%
+  select(entidad = nom_ent, municipio = nom_mun, infantil = pob0_14, 
+         adultos = pob15_64, adultos_mayores = pob65_mas)
+
+head(poblacion)
+```
+
+Con ggplot2 podemos construir gráficas
+```{r message=FALSE}
+library(ggplot2)
+```
+
+Por ejemplo, esta es la distribución de la población infantil 
+
+```{r}
+ggplot(data = poblacion) + 
+  geom_boxplot(aes(x = entidad, y = infantil, color = entidad)) + 
+  labs(title = "Distribución de la población infantil en los estados del bajío", y = "Población infantil", x = "")  +
+  scale_color_brewer(name = "Entidad", palette = "Set2") +
+  theme_classic()
+```
+
+Con `pivot_longer()` de tidyr pasamos de un dataset ancho a un dataset largo. 
+
+```{r message=FALSE}
+library(tidyr)
+```
+
+```{r}
+poblacion_por_edades <- poblacion %>%
+  pivot_longer(cols = c(infantil, adultos, adultos_mayores), 
+               names_to = "tipo_poblacion", values_to = "cantidad")
+
+head(poblacion_por_edades)
+```
+
+```{r}
+ggplot(data = poblacion_por_edades) +
+  geom_violin(aes(x = tipo_poblacion, y = cantidad, color = tipo_poblacion)) + 
+  facet_wrap(~entidad, nrow = 3, scales = "free_y") +
+  scale_color_brewer(name = "Tipo de población", palette = "Dark2") +
+  labs(y = "Población", x = "", title = "Distribución de la población en los estados del bajío") +
+  theme_bw()  +
+  theme(axis.text.x = element_blank())
+ 
+```
+
+Esta es una lista
+
+- Elemento1
+- Elemento 2
+
+**negritas**
+*cursivas* 
+
